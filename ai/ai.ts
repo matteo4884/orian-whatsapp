@@ -41,7 +41,6 @@ ${roleSystem.dynamicContent}
     ],
   });
   const content = completion.choices[0].message.content ?? "";
-  console.log(content);
   const isEscalation = content.includes(ESCALATION_CODE);
   const cleanedText = content.replace(
     ESCALATION_CODE,

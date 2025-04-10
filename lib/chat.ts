@@ -16,10 +16,8 @@ export async function handleChat(
   let sender = message.key.remoteJid;
   let senderMessage = message.message?.conversation;
 
-  console.log(senderMessage);
-
   const user = await addAndGetUser(sender!);
-  console.log(message);
+
   if (message.message?.conversation === "/start") {
     if (!user.mode) {
       await activateBot(sender!, user._id);
