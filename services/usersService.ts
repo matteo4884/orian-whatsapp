@@ -14,6 +14,7 @@ export const deactivateBot = async (sender: string, usersId: object) => {
   return UsersModel.findOneAndUpdate({ sender: sender }, { mode: false });
 };
 
-export const activateBot = async (sender: string) => {
+export const activateBot = async (sender: string, usersId: object) => {
+  await MessagesModel.deleteMany({ usersId });
   return UsersModel.findOneAndUpdate({ sender: sender }, { mode: true });
 };

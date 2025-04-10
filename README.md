@@ -15,6 +15,7 @@ Powered by [Baileys](https://github.com/WhiskeySockets/Baileys) and [OpenAI](htt
 - **Custom Commands**
   - `/start` to activate the assistant
   - `/stop` to disable automatic responses
+  - `/edit` to add dynamic data to role system (only user can exec)
 - **Seamless WhatsApp Connection**  
   Scans a QR code once to stay logged in, thanks to Baileys.
 

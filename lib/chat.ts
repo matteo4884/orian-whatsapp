@@ -5,6 +5,7 @@ import {
 } from "../services/usersService";
 import { generateMessage } from "../ai/ai";
 import { addUserMessageToDB } from "../services/messagesService";
+import { updateSystemDynamic } from "../services/agentService";
 import { WASocket, proto } from "baileys";
 
 export async function handleChat(
@@ -20,21 +21,46 @@ export async function handleChat(
   const user = await addAndGetUser(sender!);
   console.log(message);
   if (message.message?.conversation === "/start") {
-    await sock.sendMessage(sender!, {
-      text: `🤖 \`\`\`ᴼᴿᴵᴬᴺ\`\`\` 🤖
+    if (!user.mode) {
+      await activateBot(sender!, user._id);
+      await sock.sendMessage(sender!, {
+        text: `🤖 \`\`\`ᴼᴿᴵᴬᴺ\`\`\` 🤖
 \`Orian operativo!\`
 
+🟢 ᴀᴛᴛɪᴠᴏ
 > _\`\`\`Commands: /start /stop \`\`\`_`,
-    });
-    await activateBot(sender!);
+      });
+    } else {
+      await sock.sendMessage(sender!, {
+        text: `🤖 \`\`\`ᴼᴿᴵᴬᴺ\`\`\` 🤖
+\`Giá attivo! 🤦‍♂️\`
+
+🟢 ᴀᴛᴛɪᴠᴏ
+> _\`\`\`Commands: /start /stop \`\`\`_`,
+      });
+    }
   } else if (message.message?.conversation === "/stop") {
+    await deactivateBot(sender!, user._id);
     await sock.sendMessage(sender!, {
       text: `🤖 \`\`\`ᴼᴿᴵᴬᴺ\`\`\` 🤖
 \`Orian spento!\`
 
+🔴 sᴘᴇɴᴛᴏ
 > _\`\`\`Commands: /start /stop \`\`\`_`,
     });
-    await deactivateBot(sender!, user._id);
+  } else if (
+    message.message?.conversation?.includes("/edit ") &&
+    message.key.fromMe
+  ) {
+    let dynamic = message.message?.conversation.replace("/edit ", "");
+    await updateSystemDynamic(dynamic);
+    await sock.sendMessage(sender!, {
+      text: `🤖 \`\`\`ᴼᴿᴵᴬᴺ\`\`\` 🤖 
+\`Orian aggiornato!\`
+
+${user.mode ? "🟢 ᴀᴛᴛɪᴠᴏ" : "🔴 sᴘᴇɴᴛᴏ"}
+> _\`\`\`Commands: /start /stop \`\`\`_`,
+    });
   } else if (!message.key.fromMe && user?.mode) {
     const result = await generateMessage(senderMessage!, user._id);
     await addUserMessageToDB(user._id, senderMessage!);
@@ -42,7 +68,8 @@ export async function handleChat(
     await sock.sendMessage(sender!, {
       text: `🤖 \`\`\`ᴼᴿᴵᴬᴺ\`\`\` 🤖
 \`${result.text}\`
-
+ 
+${user.mode && !result.needsHuman ? "🟢 ᴀᴛᴛɪᴠᴏ" : "🔴 sᴘᴇɴᴛᴏ"}
 > _\`\`\`Commands: /start /stop \`\`\`_`,
     });
     if (result.needsHuman) await deactivateBot(sender!, user._id);

@@ -1,6 +1,8 @@
 import OpenAI from "openai";
 import { MessagesModel } from "../models/messages";
 import { ChatCompletionMessageParam } from "openai/resources/chat";
+import { ESCALATION_CODE } from "../constants";
+import { ROLE_SYSTEM } from "../roleSystem";
 require("dotenv").config();
 
 const openai = new OpenAI({
@@ -8,6 +10,8 @@ const openai = new OpenAI({
 });
 
 export async function generateMessage(text: string, usersId: object) {
+  const roleSystem = await ROLE_SYSTEM();
+
   const messagesFromDb = await MessagesModel.find({ usersId }).sort({
     createdAt: 1,
   });
@@ -16,14 +20,18 @@ export async function generateMessage(text: string, usersId: object) {
     role: m.role === "assistant" ? "assistant" : "user",
     content: m.content || "",
   }));
+
   const completion = await openai.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
       {
         role: "system",
-        content: `Sei Orian, un assistente AI progettato da Matteo Beu per assiterlo su Whatsapp. 
-Cerca di rispondere sempre tu ma se il messaggio è troppo lungo, urgente, personale, oppure richiede la presenza di Matteo: NON rispondere al contenuto, ma scrivi questo messaggio:
-09022000mb`,
+        content: `
+${roleSystem.defaultContent}
+
+Note di Matteo Beu per il suo assistente Orian:
+${roleSystem.dynamicContent}
+        `,
       },
       ...history,
       {
@@ -34,10 +42,12 @@ Cerca di rispondere sempre tu ma se il messaggio è troppo lungo, urgente, perso
   });
   const content = completion.choices[0].message.content ?? "";
   console.log(content);
-  const isEscalation = content.includes("09022000mb");
+  const isEscalation = content.includes(ESCALATION_CODE);
   const cleanedText = content.replace(
-    "09022000mb",
-    "Grazie per il messaggio. Matteo ti risponderà appena possibile."
+    ESCALATION_CODE,
+    history.length > 1
+      ? "Ottimo, vado a dormire. Matteo ti risponderà appena avrà voglia."
+      : "Matteo ti risponderà appena smette di fingere di essere occupato."
   );
   await MessagesModel.create({
     usersId: usersId,
