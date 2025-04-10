@@ -22,14 +22,12 @@ Powered by [Baileys](https://github.com/WhiskeySockets/Baileys) and [OpenAI](htt
 
 ## 🚀 Tech Stack
 
-| Technology             | Description                                     |
-| ---------------------- | ----------------------------------------------- |
-| **Node.js**            | Runtime environment for server-side JavaScript  |
-| **TypeScript**         | Adds strong typing and better tooling for JS    |
-| **Express**            | Simple HTTP server to manage routes & endpoints |
-| **Baileys**            | WebSocket connection to WhatsApp Web            |
-| **OpenAI**             | GPT-based responses for AI conversations        |
-| **MongoDB** (Optional) | Stores message history & user profiles          |
+| Technology     | Description                                  |
+| -------------- | -------------------------------------------- |
+| **TypeScript** | Adds strong typing and better tooling for JS |
+| **Baileys**    | WebSocket connection to WhatsApp Web         |
+| **OpenAI**     | GPT-based responses for AI conversations     |
+| **MongoDB**    | Stores message history & user profiles       |
 
 ---
 
